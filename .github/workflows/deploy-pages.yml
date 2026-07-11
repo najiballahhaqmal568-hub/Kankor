@@ -1,0 +1,63 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - claude/afghan-concourse-prep-app-66vlst
+  workflow_dispatch:
+
+# دسترسی لازم برای انتشار در Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# هر بار فقط یک انتشار فعال باشد
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Pages را فعال می‌کند و base_path واقعی مخزن را می‌دهد (مثلاً /Kankor)
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      # بیلد با base صحیح تا مسیر دارایی‌ها و Service Worker درست باشد
+      - name: Build
+        run: |
+          npx tsc --noEmit
+          npx vite build --base="${{ steps.pages.outputs.base_path }}/"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
