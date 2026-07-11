@@ -1,0 +1,93 @@
+/* ---------------------------------------------------------------
+   توکن‌های طراحی — پالت لاجورد و زعفرانی
+   تم پیش‌فرض: دارک (لاجورد عمیق). تم روشن با data-theme="light"
+   --------------------------------------------------------------- */
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* سطوح لاجوردی */
+  --bg: #0b1e3f;
+  --surface: #122b52;
+  --surface-2: #1e3f73;
+  --surface-3: #2a4f8a;
+  --border: #2e4a7d;
+
+  /* متن */
+  --text: #eef2fa;
+  --text-2: #aebfdd;
+  --text-3: #7e93bb;
+
+  /* لاجورد روشن — لینک و تاکید ثانویه */
+  --lapis: #4c7bd9;
+  --lapis-strong: #6d95e3;
+
+  /* زعفرانی — اکسنت اصلی و CTA */
+  --saffron: #f4a825;
+  --saffron-hover: #ffc14d;
+  --on-saffron: #201302;
+
+  /* وضعیت */
+  --correct: #3da35d;
+  --correct-bg: #14351f;
+  --wrong: #d64550;
+  --wrong-bg: #3a1a1e;
+  --unanswered: #8a93a6;
+  --flag: #e08a2e;
+
+  --shadow: 0 4px 16px rgba(2, 8, 23, 0.45);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #f3f5fa;
+  --surface: #ffffff;
+  --surface-2: #e8edf7;
+  --surface-3: #d9e2f2;
+  --border: #c6d2e8;
+
+  --text: #14213d;
+  --text-2: #3d5075;
+  --text-3: #68779a;
+
+  --lapis: #26529c;
+  --lapis-strong: #1c3f7a;
+
+  --saffron: #d98d0a;
+  --saffron-hover: #b97806;
+  --on-saffron: #ffffff;
+
+  --correct: #2b8049;
+  --correct-bg: #e2f3e8;
+  --wrong: #bb3540;
+  --wrong-bg: #fbe7e9;
+  --unanswered: #68779a;
+  --flag: #b96f1e;
+
+  --shadow: 0 4px 14px rgba(20, 33, 61, 0.12);
+}
+
+:root {
+  /* فاصله و اندازه */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --font-family: 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif;
+  --fs-sm: 0.85rem;
+  --fs-base: 1rem;
+  --fs-lg: 1.15rem;
+  --fs-xl: 1.4rem;
+  --fs-2xl: 1.8rem;
+
+  --nav-height: 62px;
+  --header-height: 56px;
+  --content-max: 780px;
+}

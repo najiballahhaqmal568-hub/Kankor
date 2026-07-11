@@ -1,0 +1,25 @@
+/* فونت Vazirmatn — به‌صورت لوکال باندل می‌شود تا اپ کاملاً آفلاین باشد */
+
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../../node_modules/vazirmatn/fonts/webfonts/Vazirmatn-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../../node_modules/vazirmatn/fonts/webfonts/Vazirmatn-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../../node_modules/vazirmatn/fonts/webfonts/Vazirmatn-Bold.woff2') format('woff2');
+}
