@@ -15,7 +15,7 @@
 
 ## وضعیت فعلی
 
-**مرحله فعال:** ✅ مرحله ۶ (مرور فاصله‌دار SM-2) تکمیل شد — در حال شروع مرحله ۷ (PWA و صیقل نهایی)
+**وضعیت:** 🎉 **فاز ۱ (MVP آفلاین) کامل شد.** همه هفت مرحله پیاده و end-to-end تست شدند.
 
 | مرحله | وضعیت |
 |---|---|
@@ -25,9 +25,11 @@
 | ۴. شبیه‌ساز آزمون | ✅ تکمیل |
 | ۵. کارنامه هوشمند | ✅ تکمیل |
 | ۶. مرور فاصله‌دار SM-2 | ✅ تکمیل |
-| ۷. PWA + صیقل نهایی | ⏳ در جریان |
+| ۷. PWA + صیقل نهایی | ✅ تکمیل |
 
-**تست‌ها:** ۱۹ تست واحد سبز (examEngine ۷ + analytics ۵ + sm2 ۷). نمودار کارنامه از رنگ وضعیتی + برچسب عددی استفاده می‌کند (رنگ به‌تنهایی حامل معنا نیست).
+**تست‌ها:** ۱۹ تست واحد سبز (examEngine ۷ + analytics ۵ + sm2 ۷). آفلاین با Service Worker تأیید شد. نمودار کارنامه از رنگ وضعیتی + برچسب عددی استفاده می‌کند (رنگ به‌تنهایی حامل معنا نیست).
+
+**قدم بعدی (فاز ۲):** بسته‌بندی APK با Capacitor، افزودن سؤالات واقعی سال‌های گذشته، زبان پشتو در رابط.
 | ۴. شبیه‌ساز آزمون | ⬜ |
 | ۵. کارنامه هوشمند | ⬜ |
 | ۶. مرور فاصله‌دار SM-2 | ⬜ |
@@ -52,17 +54,24 @@ src/
 │   ├── subjects.ts     # ۱۰ مضمون + blueprint آزمون کامل و مضمونی
 │   └── bank/           # ۱۰ فایل JSON سؤالات + index.ts (تجمیع + اعتبارسنجی + BANK_VERSION)
 ├── logic/
-│   ├── examEngine.ts   # buildExam + gradeExam (خالص، قابل تست) + examEngine.test.ts
-│   └── (sm2.ts در مرحله ۶)
+│   ├── examEngine.ts   # buildExam + gradeExam (خالص) + تست
+│   ├── analytics.ts    # topicBreakdown/weakestTopics/studyRecommendations + تست
+│   └── sm2.ts          # الگوریتم SuperMemo-2 (خالص) + تست
 ├── db/
 │   ├── db.ts           # Dexie: questions/attempts/answers/srsCards/activeExam/meta
 │   ├── seed.ts         # seed نسخه‌دار بانک به IndexedDB (اولین اجرا)
 │   ├── questions.ts    # getQuestion/getQuestions از بانک استاتیک (نگاشت id)
 │   ├── examSession.ts  # startExam/getActiveExam/saveActiveExam/finishExam
-│   └── reviewQueue.ts  # enqueueForReview (افزودن غلط‌ها به صف) + dueCount
+│   └── reviewQueue.ts  # enqueueForReview + dueCards + gradeCard (SM-2)
+├── lib/
+│   ├── format.ts       # ارقام دری، مدت، تاریخ شمسی
+│   ├── theme.ts        # تم دارک/روشن
+│   └── settings.ts     # اندازه فونت
 ├── components/
 │   └── QuestionView.tsx # نمایش مشترک سؤال + گزینه‌ها + توضیح‌ها (تمرین/کارنامه/مرور)
 └── pages/              # Home, Bank, ExamSetup, ExamRunner, Report, Review, Settings
+
+پیکربندی PWA در `vite.config.ts` (vite-plugin-pwa) + آیکون‌ها در `public/icons/`.
 ```
 
 ### مدل داده — نکات

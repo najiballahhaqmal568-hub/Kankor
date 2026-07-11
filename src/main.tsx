@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { HashRouter } from 'react-router-dom';
 import App from './App';
 import { applyTheme, getTheme } from './lib/theme';
+import { applyFontSize, getFontSize } from './lib/settings';
 import { seedIfNeeded } from './db/seed';
 import './styles/fonts.css';
 import './styles/tokens.css';
@@ -10,6 +11,7 @@ import './styles/base.css';
 import './styles/components.css';
 
 applyTheme(getTheme());
+applyFontSize(getFontSize());
 // وارد کردن بانک سؤالات به IndexedDB در پس‌زمینه (اولین اجرا)
 void seedIfNeeded();
 
