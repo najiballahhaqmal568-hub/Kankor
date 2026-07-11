@@ -1,0 +1,92 @@
+[
+  {
+    "id": "eng-0001",
+    "subject": "english",
+    "topic": "Grammar",
+    "difficulty": 1,
+    "stem": "Choose the correct form: She ___ to school every day.",
+    "options": [
+      { "text": "go", "explanation": "غلط — با فاعل سوم‌شخص مفرد (she) فعل باید «goes» باشد." },
+      { "text": "goes", "explanation": "درست — در زمان حال ساده با she/he/it به فعل ‎-es/-s‎ اضافه می‌شود." },
+      { "text": "going", "explanation": "غلط — «going» بدون فعل کمکی (is) به‌تنهایی درست نیست." },
+      { "text": "gone", "explanation": "غلط — «gone» شکل سوم فعل است و اینجا مناسب نیست." }
+    ],
+    "correctIndex": 1,
+    "studyHint": "کتاب انگلیسی صنف ۸، Present Simple Tense"
+  },
+  {
+    "id": "eng-0002",
+    "subject": "english",
+    "topic": "Vocabulary",
+    "difficulty": 1,
+    "stem": "What is the opposite (antonym) of the word \"happy\"?",
+    "options": [
+      { "text": "glad", "explanation": "غلط — «glad» مترادف happy است، نه متضاد." },
+      { "text": "sad", "explanation": "درست — «sad» به‌معنای غمگین، متضاد happy است." },
+      { "text": "joyful", "explanation": "غلط — «joyful» نیز به‌معنای شاد است." },
+      { "text": "cheerful", "explanation": "غلط — «cheerful» هم‌معنی شادمان است." }
+    ],
+    "correctIndex": 1,
+    "studyHint": "کتاب انگلیسی صنف ۷، Antonyms and Synonyms"
+  },
+  {
+    "id": "eng-0003",
+    "subject": "english",
+    "topic": "Grammar",
+    "difficulty": 2,
+    "stem": "Choose the correct past tense: Yesterday, I ___ a book.",
+    "options": [
+      { "text": "read", "explanation": "درست — شکل گذشته «read» از نظر املا مانند حال است اما تلفظ آن /red/ می‌شود." },
+      { "text": "reads", "explanation": "غلط — این شکل حال ساده سوم‌شخص است." },
+      { "text": "reading", "explanation": "غلط — این شکل استمراری است و به فعل کمکی نیاز دارد." },
+      { "text": "readed", "explanation": "غلط — «read» فعل بی‌قاعده است و ‎-ed‎ نمی‌گیرد." }
+    ],
+    "correctIndex": 0,
+    "studyHint": "کتاب انگلیسی صنف ۹، Past Simple / Irregular Verbs"
+  },
+  {
+    "id": "eng-0004",
+    "subject": "english",
+    "topic": "Prepositions",
+    "difficulty": 2,
+    "stem": "Fill in the blank: The book is ___ the table.",
+    "options": [
+      { "text": "in", "explanation": "غلط — «in» برای داخل بودن در چیزی به‌کار می‌رود." },
+      { "text": "on", "explanation": "درست — «on» برای قرار داشتن روی سطحی مانند میز استفاده می‌شود." },
+      { "text": "at", "explanation": "غلط — «at» برای نقطه یا مکان مشخص است، نه روی سطح." },
+      { "text": "under", "explanation": "غلط — «under» به‌معنای زیر است." }
+    ],
+    "correctIndex": 1,
+    "studyHint": "کتاب انگلیسی صنف ۸، Prepositions of Place"
+  },
+  {
+    "id": "eng-0005",
+    "subject": "english",
+    "topic": "Grammar",
+    "difficulty": 3,
+    "stem": "Choose the correct sentence in the present perfect tense.",
+    "options": [
+      { "text": "I have finished my homework.", "explanation": "درست — ساختار حال کامل: ‎have/has + past participle‎." },
+      { "text": "I has finished my homework.", "explanation": "غلط — با فاعل I باید «have» بیاید نه «has»." },
+      { "text": "I have finish my homework.", "explanation": "غلط — فعل باید به شکل سوم (finished) باشد." },
+      { "text": "I am finished my homework.", "explanation": "غلط — این ساختار حال کامل نیست." }
+    ],
+    "correctIndex": 0,
+    "studyHint": "کتاب انگلیسی صنف ۱۱، Present Perfect Tense"
+  },
+  {
+    "id": "eng-0006",
+    "subject": "english",
+    "topic": "Vocabulary",
+    "difficulty": 2,
+    "stem": "Which word means a person who teaches students?",
+    "options": [
+      { "text": "doctor", "explanation": "غلط — doctor یعنی داکتر/طبیب." },
+      { "text": "teacher", "explanation": "درست — «teacher» به‌معنای معلم است." },
+      { "text": "engineer", "explanation": "غلط — engineer یعنی انجنیر." },
+      { "text": "farmer", "explanation": "غلط — farmer یعنی دهقان." }
+    ],
+    "correctIndex": 1,
+    "studyHint": "کتاب انگلیسی صنف ۷، Jobs and Occupations"
+  }
+]

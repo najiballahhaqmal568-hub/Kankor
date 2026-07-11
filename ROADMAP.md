@@ -9,12 +9,12 @@
 - [x] RTL کامل + فونت Vazirmatn لوکال
 - [x] پوسته اپ: هدر، ناوبری پایین، مسیرهای صفحات
 
-### مرحله ۲ — مدل داده و بانک سؤالات ⏳
-- [ ] `schema.ts`: تایپ‌های Question / Subject / ExamBlueprint
-- [ ] `subjects.ts`: مضامین کانکور + وزن هر مضمون در آزمون کامل
-- [ ] بانک سؤالات نمونه (~۸۰ سؤال، ۸ مضمون) با توضیح هر گزینه
-- [ ] Dexie: جداول attempts / answers / srsCards / settings / meta
-- [ ] Seed نسخه‌دار بانک سؤالات به IndexedDB
+### مرحله ۲ — مدل داده و بانک سؤالات ✅
+- [x] `schema.ts`: تایپ‌های Question / Subject / ExamBlueprint / Attempt / SrsCard / ActiveExam
+- [x] `subjects.ts`: ۱۰ مضمون کانکور + وزن هر مضمون در آزمون کامل (۱۶۰س/۱۸۰د)
+- [x] بانک سؤالات نمونه (۶۵ سؤال، ۱۰ مضمون) با توضیح هر ۴ گزینه
+- [x] Dexie: جداول questions / attempts / answers / srsCards / activeExam / meta
+- [x] Seed نسخه‌دار بانک سؤالات به IndexedDB + اعتبارسنجی
 
 ### مرحله ۳ — صفحه بانک سؤالات
 - [ ] فیلتر مضمون / مبحث / سختی
