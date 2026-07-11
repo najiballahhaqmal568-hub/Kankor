@@ -15,14 +15,15 @@
 
 ## وضعیت فعلی
 
-**مرحله فعال:** ✅ مرحله ۳ (صفحه بانک سؤالات) تکمیل شد — در حال شروع مرحله ۴ (شبیه‌ساز آزمون)
+**مرحله فعال:** ✅ مرحله ۴ (شبیه‌ساز آزمون) تکمیل شد — در حال شروع مرحله ۵ (کارنامه هوشمند)
 
 | مرحله | وضعیت |
 |---|---|
 | ۱. بنیاد (scaffold، تم، RTL، پوسته) | ✅ تکمیل |
 | ۲. مدل داده + بانک سؤالات + Dexie | ✅ تکمیل |
 | ۳. صفحه بانک سؤالات | ✅ تکمیل |
-| ۴. شبیه‌ساز آزمون | ⏳ در جریان |
+| ۴. شبیه‌ساز آزمون | ✅ تکمیل |
+| ۵. کارنامه هوشمند | ⏳ در جریان |
 | ۴. شبیه‌ساز آزمون | ⬜ |
 | ۵. کارنامه هوشمند | ⬜ |
 | ۶. مرور فاصله‌دار SM-2 | ⬜ |
@@ -46,9 +47,14 @@ src/
 │   ├── schema.ts       # تایپ‌های Question, Subject, ExamBlueprint, Attempt, SrsCard, ActiveExam
 │   ├── subjects.ts     # ۱۰ مضمون + blueprint آزمون کامل و مضمونی
 │   └── bank/           # ۱۰ فایل JSON سؤالات + index.ts (تجمیع + اعتبارسنجی + BANK_VERSION)
+├── logic/
+│   ├── examEngine.ts   # buildExam + gradeExam (خالص، قابل تست) + examEngine.test.ts
+│   └── (sm2.ts در مرحله ۶)
 ├── db/
 │   ├── db.ts           # Dexie: questions/attempts/answers/srsCards/activeExam/meta
 │   ├── seed.ts         # seed نسخه‌دار بانک به IndexedDB (اولین اجرا)
+│   ├── questions.ts    # getQuestion/getQuestions از بانک استاتیک (نگاشت id)
+│   ├── examSession.ts  # startExam/getActiveExam/saveActiveExam/finishExam
 │   └── reviewQueue.ts  # enqueueForReview (افزودن غلط‌ها به صف) + dueCount
 ├── components/
 │   └── QuestionView.tsx # نمایش مشترک سؤال + گزینه‌ها + توضیح‌ها (تمرین/کارنامه/مرور)
