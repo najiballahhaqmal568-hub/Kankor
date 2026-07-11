@@ -52,6 +52,11 @@
 ## فاز ۱ کامل شد 🎉
 همه قابلیت‌های MVP آفلاین پیاده و به‌صورت end-to-end تست شدند.
 
+### انتشار ✅
+- [x] Workflow انتشار خودکار GitHub Pages (`deploy-pages.yml`)
+- [x] فعال‌سازی Pages توسط مالک مخزن (Source: GitHub Actions)
+- [x] **اپ زنده:** https://najiballahhaqmal568-hub.github.io/Kankor/
+
 ## فاز ۲ — آینده (خارج از MVP)
 - بسته‌بندی APK اندروید با Capacitor
 - بانک سؤالات واقعی کامل (سال‌های گذشته کانکور)
