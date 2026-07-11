@@ -10,6 +10,10 @@ import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
 
+// تضمین RTL حتی وقتی سند میزبان dir نداشته باشد (مثلاً در پیش‌نمایش جاسازی‌شده)
+document.documentElement.setAttribute('dir', 'rtl');
+document.documentElement.setAttribute('lang', 'fa-AF');
+
 applyTheme(getTheme());
 applyFontSize(getFontSize());
 // وارد کردن بانک سؤالات به IndexedDB در پس‌زمینه (اولین اجرا)
