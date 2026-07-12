@@ -1,9 +1,9 @@
 import type { Question } from '../data/schema';
-import { SUBJECT_MAP } from '../data/subjects';
+import { getCorrectIndex } from '../data/schema';
+import { getSubject } from '../data/subjects';
 import { faNum } from '../lib/format';
 
-const OPTION_LABELS = ['الف', 'ب', 'ج', 'د'];
-const DIFFICULTY_LABEL = ['', 'آسان', 'متوسط', 'سخت'];
+const OPTION_LABELS = ['الف', 'ب', 'ج', 'د', 'ه', 'و'];
 
 interface Props {
   question: Question;
@@ -24,7 +24,9 @@ export default function QuestionView({
   revealed,
   onSelect,
 }: Props) {
-  const subject = SUBJECT_MAP[question.subject];
+  const subject = getSubject(question.subject);
+  const correctIndex = getCorrectIndex(question);
+  const wasWrong = revealed && selected != null && selected !== correctIndex;
 
   return (
     <div className="question-view">
@@ -34,15 +36,15 @@ export default function QuestionView({
         </span>
         <span>
           {index != null && total != null && `سؤال ${faNum(index + 1)} از ${faNum(total)} · `}
-          سختی: {DIFFICULTY_LABEL[question.difficulty]}
+          سختی: {question.difficulty}
         </span>
       </div>
 
-      <h3 className="question-stem">{question.stem}</h3>
+      <h3 className="question-stem">{question.question}</h3>
 
       <div className="options">
         {question.options.map((opt, i) => {
-          const isCorrect = i === question.correctIndex;
+          const isCorrect = i === correctIndex;
           const isSelected = i === selected;
           let cls = 'option';
           if (revealed) {
@@ -59,7 +61,7 @@ export default function QuestionView({
               disabled={revealed || !onSelect}
               aria-pressed={isSelected}
             >
-              <span className="option-label">{OPTION_LABELS[i]}</span>
+              <span className="option-label">{OPTION_LABELS[i] ?? faNum(i + 1)}</span>
               <span className="option-text">{opt.text}</span>
               {revealed && isCorrect && <span className="option-mark">✓</span>}
               {revealed && isSelected && !isCorrect && <span className="option-mark">✕</span>}
@@ -70,15 +72,27 @@ export default function QuestionView({
 
       {revealed && (
         <div className="explanations">
+          {/* چرا پاسخ درست، درست است — همیشه نمایش داده می‌شود */}
+          <p className="explanation-callout">💡 {question.explanation}</p>
+
+          {wasWrong && (
+            <p className="explanation is-wrong-selected">
+              <strong>چرا گزینه انتخابی شما غلط بود:</strong>{' '}
+              {question.options[selected!].why_wrong}
+            </p>
+          )}
+
           {question.options.map((opt, i) => (
             <p
               key={i}
-              className={`explanation ${i === question.correctIndex ? 'is-correct' : ''}`}
+              className={`explanation ${i === correctIndex ? 'is-correct' : ''}`}
             >
-              <strong>{OPTION_LABELS[i]})</strong> {opt.explanation}
+              <strong>{(OPTION_LABELS[i] ?? faNum(i + 1))})</strong>{' '}
+              {i === correctIndex ? opt.why_correct : opt.why_wrong}
             </p>
           ))}
-          <p className="study-hint">📚 پیشنهاد مطالعه: {question.studyHint}</p>
+
+          <p className="study-hint">📚 پیشنهاد مطالعه: {question.chapter_ref}</p>
         </div>
       )}
     </div>

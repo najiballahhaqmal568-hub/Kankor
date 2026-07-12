@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Question, SrsCard } from '../data/schema';
+import { getCorrectIndex } from '../data/schema';
 import { getQuestion } from '../db/questions';
 import { dueCards, gradeCard } from '../db/reviewQueue';
 import QuestionView from '../components/QuestionView';
@@ -88,7 +89,7 @@ export default function Review() {
   }
 
   const q = current.question;
-  const correct = selected === q.correctIndex;
+  const correct = selected != null && selected === getCorrectIndex(q);
 
   return (
     <div className="stack">

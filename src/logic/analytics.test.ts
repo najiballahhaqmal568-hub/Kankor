@@ -8,27 +8,28 @@ import {
 import type { AnswerRecord, Question } from '../data/schema';
 
 const questions: Record<string, Question> = {
-  m1: mk('m1', 'math', 'الجبر', 'کتاب الجبر'),
-  m2: mk('m2', 'math', 'الجبر', 'کتاب الجبر'),
-  m3: mk('m3', 'math', 'هندسه', 'کتاب هندسه'),
-  p1: mk('p1', 'physics', 'حرکت', 'کتاب فزیک'),
+  m1: mk('m1', 'ریاضی', 'الجبر', 'کتاب الجبر'),
+  m2: mk('m2', 'ریاضی', 'الجبر', 'کتاب الجبر'),
+  m3: mk('m3', 'ریاضی', 'هندسه', 'کتاب هندسه'),
+  p1: mk('p1', 'فزیک', 'حرکت', 'کتاب فزیک'),
 };
 
-function mk(id: string, subject: Question['subject'], topic: string, hint: string): Question {
+function mk(id: string, subject: string, topic: string, chapterRef: string): Question {
   return {
     id,
     subject,
     topic,
-    difficulty: 1,
-    stem: '',
+    difficulty: 'آسان',
+    question: '',
     options: [
-      { text: '', explanation: '' },
-      { text: '', explanation: '' },
-      { text: '', explanation: '' },
-      { text: '', explanation: '' },
+      { text: 'a', correct: true, why_correct: '' },
+      { text: 'b', correct: false, why_wrong: '' },
     ],
-    correctIndex: 0,
-    studyHint: hint,
+    explanation: '',
+    chapter_ref: chapterRef,
+    language: 'dari',
+    source: 'test',
+    verified: true,
   };
 }
 
@@ -76,13 +77,13 @@ describe('weakestTopics', () => {
 });
 
 describe('studyRecommendations', () => {
-  it('پیشنهادها را بر اساس مضمون گروه‌بندی و hint تکراری را حذف می‌کند', () => {
+  it('پیشنهادها را بر اساس مضمون گروه‌بندی و chapter_ref تکراری را حذف می‌کند', () => {
     const answers = [ans('m1', false), ans('m2', false), ans('p1', false)];
     const groups = studyRecommendations(answers, lookup);
-    const math = groups.find((g) => g.subject === 'math')!;
-    // m1 و m2 هر دو hint یکسان دارند → فقط یک مورد
+    const math = groups.find((g) => g.subject === 'ریاضی')!;
+    // m1 و m2 هر دو chapter_ref یکسان دارند → فقط یک مورد
     expect(math.items).toHaveLength(1);
-    expect(groups.find((g) => g.subject === 'physics')!.items).toHaveLength(1);
+    expect(groups.find((g) => g.subject === 'فزیک')!.items).toHaveLength(1);
   });
 
   it('برای پاسخ درست پیشنهادی نمی‌دهد', () => {

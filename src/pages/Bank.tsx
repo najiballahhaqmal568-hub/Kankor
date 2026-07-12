@@ -2,20 +2,15 @@ import { useMemo, useState } from 'react';
 import { ALL_QUESTIONS } from '../data/bank';
 import { SUBJECTS } from '../data/subjects';
 import type { Question, SubjectId } from '../data/schema';
+import { getCorrectIndex } from '../data/schema';
 import QuestionView from '../components/QuestionView';
 import { enqueueForReview } from '../db/reviewQueue';
 import { faNum } from '../lib/format';
 
-const DIFFICULTIES: { value: 1 | 2 | 3; label: string }[] = [
-  { value: 1, label: 'آسان' },
-  { value: 2, label: 'متوسط' },
-  { value: 3, label: 'سخت' },
-];
-
 export default function Bank() {
   const [subject, setSubject] = useState<SubjectId | 'all'>('all');
   const [topic, setTopic] = useState<string>('all');
-  const [difficulty, setDifficulty] = useState<1 | 2 | 3 | 'all'>('all');
+  const [difficulty, setDifficulty] = useState<string>('all');
 
   // حالت تمرین
   const [practice, setPractice] = useState<Question[] | null>(null);
@@ -27,6 +22,14 @@ export default function Bank() {
     const set = new Set<string>();
     ALL_QUESTIONS.forEach((q) => {
       if (subject === 'all' || q.subject === subject) set.add(q.topic);
+    });
+    return Array.from(set);
+  }, [subject]);
+
+  const difficulties = useMemo(() => {
+    const set = new Set<string>();
+    ALL_QUESTIONS.forEach((q) => {
+      if (subject === 'all' || q.subject === subject) set.add(q.difficulty);
     });
     return Array.from(set);
   }, [subject]);
@@ -54,7 +57,7 @@ export default function Bank() {
     if (pSelected != null || !practice) return;
     setPSelected(i);
     const q = practice[pIndex];
-    if (i === q.correctIndex) {
+    if (i === getCorrectIndex(q)) {
       setPCorrect((c) => c + 1);
     } else {
       await enqueueForReview(q.id, q.subject);
@@ -118,6 +121,7 @@ export default function Bank() {
               onClick={() => {
                 setSubject('all');
                 setTopic('all');
+                setDifficulty('all');
               }}
             >
               همه
@@ -129,6 +133,7 @@ export default function Bank() {
                 onClick={() => {
                   setSubject(s.id);
                   setTopic('all');
+                  setDifficulty('all');
                 }}
               >
                 {s.icon} {s.name}
@@ -167,13 +172,13 @@ export default function Bank() {
             >
               همه
             </button>
-            {DIFFICULTIES.map((d) => (
+            {difficulties.map((d) => (
               <button
-                key={d.value}
-                className={`chip chip-btn ${difficulty === d.value ? 'active' : ''}`}
-                onClick={() => setDifficulty(d.value)}
+                key={d}
+                className={`chip chip-btn ${difficulty === d ? 'active' : ''}`}
+                onClick={() => setDifficulty(d)}
               >
-                {d.label}
+                {d}
               </button>
             ))}
           </div>

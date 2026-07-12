@@ -54,9 +54,31 @@ export function weakestTopics(topics: TopicStat[], limit = 5): TopicStat[] {
     .slice(0, limit);
 }
 
+export interface SubjectTopicGroup {
+  subject: SubjectId;
+  topics: TopicStat[];
+}
+
 /**
- * پیشنهادهای مطالعه: برای هر سؤال غلط، studyHint آن را بر اساس مضمون گروه‌بندی می‌کند.
- * هر پیشنهاد یکتا (بر اساس متن hint) در هر مضمون فقط یک‌بار می‌آید.
+ * تفکیک عملکرد را بر اساس مضمون و سپس مبحث گروه‌بندی می‌کند (برای کارنامه هوشمند).
+ * هر مضمون شامل فهرست مباحث آن است، مرتب‌شده از ضعیف به قوی.
+ */
+export function subjectTopicBreakdown(topics: TopicStat[]): SubjectTopicGroup[] {
+  const bySubject = new Map<SubjectId, TopicStat[]>();
+  for (const t of topics) {
+    const list = bySubject.get(t.subject) ?? [];
+    list.push(t);
+    bySubject.set(t.subject, list);
+  }
+  return Array.from(bySubject.entries()).map(([subject, list]) => ({
+    subject,
+    topics: [...list].sort((a, b) => a.ratio - b.ratio),
+  }));
+}
+
+/**
+ * پیشنهادهای مطالعه: برای هر سؤال غلط، chapter_ref آن را بر اساس مضمون گروه‌بندی می‌کند.
+ * هر پیشنهاد یکتا (بر اساس متن مرجع) در هر مضمون فقط یک‌بار می‌آید.
  */
 export function studyRecommendations(
   answers: AnswerRecord[],
@@ -68,7 +90,7 @@ export function studyRecommendations(
     if (a.correct) continue;
     const q = lookup(a.questionId);
     if (!q) continue;
-    const hintKey = `${q.subject}::${q.studyHint}`;
+    const hintKey = `${q.subject}::${q.chapter_ref}`;
     if (seenHints.has(hintKey)) continue;
     seenHints.add(hintKey);
 
@@ -77,7 +99,7 @@ export function studyRecommendations(
       group = { subject: q.subject, items: [] };
       bySubject.set(q.subject, group);
     }
-    group.items.push({ questionId: q.id, topic: q.topic, hint: q.studyHint });
+    group.items.push({ questionId: q.id, topic: q.topic, hint: q.chapter_ref });
   }
   return Array.from(bySubject.values());
 }

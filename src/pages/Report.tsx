@@ -3,13 +3,13 @@ import { Link, useParams } from 'react-router-dom';
 import type { AnswerRecord, Attempt } from '../data/schema';
 import { db } from '../db/db';
 import { getQuestion } from '../db/questions';
-import { SUBJECT_MAP } from '../data/subjects';
+import { getSubject } from '../data/subjects';
 import {
   overallMessage,
   perfBand,
   studyRecommendations,
+  subjectTopicBreakdown,
   topicBreakdown,
-  weakestTopics,
 } from '../logic/analytics';
 import QuestionView from '../components/QuestionView';
 import { faDate, faDuration, faNum, faPercent } from '../lib/format';
@@ -51,7 +51,7 @@ export default function Report() {
 
   const ratio = attempt.total ? attempt.score / attempt.total : 0;
   const topics = topicBreakdown(answers, getQuestion);
-  const weak = weakestTopics(topics);
+  const bySubject = subjectTopicBreakdown(topics);
   const study = studyRecommendations(answers, getQuestion);
   const answerMap = new Map(answers.map((a) => [a.questionId, a]));
 
@@ -90,15 +90,16 @@ export default function Report() {
         <h3>تحلیل مضمون‌به‌مضمون</h3>
         {attempt.perSubject.map((s) => {
           const r = s.total ? s.correct / s.total : 0;
+          const subj = getSubject(s.subject);
           return (
             <div key={s.subject} className="bar-row">
               <span className="small">
-                {SUBJECT_MAP[s.subject].icon} {SUBJECT_MAP[s.subject].name}
+                {subj.icon} {subj.name}
               </span>
               <div
                 className="bar-track"
                 role="img"
-                aria-label={`${SUBJECT_MAP[s.subject].name}: ${faPercent(r)}`}
+                aria-label={`${subj.name}: ${faPercent(r)}`}
               >
                 <div
                   className="bar-fill"
@@ -113,21 +114,31 @@ export default function Report() {
         })}
       </div>
 
-      {/* ضعیف‌ترین مباحث */}
-      {weak.length > 0 && (
-        <div className="card">
-          <h3>ضعیف‌ترین مباحث</h3>
-          <div className="filter-group">
-            {weak.map((t) => (
-              <span
-                key={`${t.subject}-${t.topic}`}
-                className="chip"
-                style={{ borderColor: BAND_COLOR[perfBand(t.ratio)] }}
-              >
-                {t.topic} · {faPercent(t.ratio)}
-              </span>
-            ))}
-          </div>
+      {/* تفکیک بر اساس مضمون و مبحث */}
+      {bySubject.length > 0 && (
+        <div className="card stack">
+          <h3>تحلیل مضمون → مبحث</h3>
+          {bySubject.map((g) => {
+            const subj = getSubject(g.subject);
+            return (
+              <div key={g.subject}>
+                <strong className="small">
+                  {subj.icon} {subj.name}
+                </strong>
+                <div className="filter-group" style={{ marginTop: 'var(--space-1)' }}>
+                  {g.topics.map((t) => (
+                    <span
+                      key={t.topic}
+                      className="chip"
+                      style={{ borderColor: BAND_COLOR[perfBand(t.ratio)] }}
+                    >
+                      {t.topic} · {faNum(t.correct)}/{faNum(t.total)} · {faPercent(t.ratio)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -135,20 +146,23 @@ export default function Report() {
       {study.length > 0 && (
         <div className="card">
           <h3>پیشنهاد مطالعه 📚</h3>
-          {study.map((g) => (
-            <div key={g.subject} style={{ marginBottom: 'var(--space-3)' }}>
-              <strong className="small">
-                {SUBJECT_MAP[g.subject].icon} {SUBJECT_MAP[g.subject].name}
-              </strong>
-              <ul style={{ margin: 'var(--space-1) 0', paddingInlineStart: '1.2rem' }}>
-                {g.items.map((it) => (
-                  <li key={it.questionId} className="small muted">
-                    {it.hint}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {study.map((g) => {
+            const subj = getSubject(g.subject);
+            return (
+              <div key={g.subject} style={{ marginBottom: 'var(--space-3)' }}>
+                <strong className="small">
+                  {subj.icon} {subj.name}
+                </strong>
+                <ul style={{ margin: 'var(--space-1) 0', paddingInlineStart: '1.2rem' }}>
+                  {g.items.map((it) => (
+                    <li key={it.questionId} className="small muted">
+                      {it.hint}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
         </div>
       )}
 

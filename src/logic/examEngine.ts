@@ -6,6 +6,7 @@ import type {
   SubjectId,
   SubjectResult,
 } from '../data/schema';
+import { getCorrectIndex } from '../data/schema';
 
 /** انتخاب تصادفی n عنصر از یک آرایه (بدون تغییر آرایه اصلی) */
 export function pickRandom<T>(items: T[], n: number, rng: () => number = Math.random): T[] {
@@ -53,7 +54,7 @@ export function gradeExam(
 
   for (const q of questions) {
     const selected = answers[q.id] ?? null;
-    const correct = selected === q.correctIndex;
+    const correct = selected != null && selected === getCorrectIndex(q);
     if (correct) score++;
 
     let bucket = perSubjectMap.get(q.subject);

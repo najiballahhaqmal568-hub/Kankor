@@ -11,11 +11,17 @@ const AVAILABLE: Record<string, number> = ALL_QUESTIONS.reduce((acc, q) => {
   return acc;
 }, {} as Record<string, number>);
 
+function sumCounts(counts: Partial<Record<SubjectId, number>>): number {
+  let total = 0;
+  for (const n of Object.values(counts)) total += n ?? 0;
+  return total;
+}
+
 export default function ExamSetup() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<ExamMode>('full');
-  const [subject, setSubject] = useState<SubjectId>('math');
-  const [custom, setCustom] = useState<Partial<Record<SubjectId, number>>>({ math: 5, physics: 5 });
+  const [subject, setSubject] = useState<SubjectId>(SUBJECTS[0]?.id ?? '');
+  const [custom, setCustom] = useState<Partial<Record<SubjectId, number>>>({});
   const [hasActive, setHasActive] = useState(false);
 
   useEffect(() => {
@@ -31,11 +37,11 @@ export default function ExamSetup() {
     const counts = Object.fromEntries(
       Object.entries(custom).filter(([, n]) => n && n > 0),
     ) as Partial<Record<SubjectId, number>>;
-    const total = Object.values(counts).reduce((a, b) => a + (b || 0), 0);
+    const total = sumCounts(counts);
     return { mode: 'custom', counts, durationSec: total * 60 };
   }, [mode, subject, custom]);
 
-  const totalQuestions = Object.values(blueprint.counts).reduce((a, b) => a + (b || 0), 0);
+  const totalQuestions = sumCounts(blueprint.counts);
 
   const begin = async () => {
     await startExam(blueprint);

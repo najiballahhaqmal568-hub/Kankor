@@ -281,6 +281,22 @@
   color: var(--text);
 }
 
+.explanation-callout {
+  margin: 0 0 var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--surface-3);
+  border: 1px solid var(--lapis);
+  font-size: var(--fs-sm);
+  line-height: 1.8;
+}
+
+.explanation.is-wrong-selected {
+  border-inline-start-color: var(--wrong);
+  background: var(--wrong-bg);
+  color: var(--text);
+}
+
 .study-hint {
   margin: var(--space-2) 0 0;
   font-size: var(--fs-sm);

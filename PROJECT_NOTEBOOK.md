@@ -29,7 +29,9 @@
 
 **تست‌ها:** ۱۹ تست واحد سبز (examEngine ۷ + analytics ۵ + sm2 ۷). آفلاین با Service Worker تأیید شد. نمودار کارنامه از رنگ وضعیتی + برچسب عددی استفاده می‌کند (رنگ به‌تنهایی حامل معنا نیست).
 
-**قدم بعدی (فاز ۲):** بسته‌بندی APK با Capacitor، افزودن سؤالات واقعی سال‌های گذشته، زبان پشتو در رابط.
+**به‌روزرسانی مهم (۱۴۰۵/۰۴/۲۱):** بانک سؤالات نمونه با بانک واقعی رهنمون ۱۴۰۵ (۵۷ سؤال verified، ۴ مضمون علوم) جایگزین شد؛ مدل داده (schema.ts) کاملاً با ساختار `questions.json` یکی شد — نه adapter، نه فیلد اضافه. جزئیات در ADR-007.
+
+**قدم بعدی (فاز ۲):** بسته‌بندی APK با Capacitor، افزودن بچ‌های بعدی سؤالات (مضامین انسانی)، زبان پشتو در رابط.
 
 ## انتشار (Deployment)
 
@@ -54,9 +56,9 @@ src/
 │   ├── base.css        # ریست + تایپوگرافی + فرم‌ها
 │   └── components.css  # پوسته، ناوبری، card/btn/chip و اجزای عمومی
 ├── data/
-│   ├── schema.ts       # تایپ‌های Question, Subject, ExamBlueprint, Attempt, SrsCard, ActiveExam
-│   ├── subjects.ts     # ۱۰ مضمون + blueprint آزمون کامل و مضمونی
-│   └── bank/           # ۱۰ فایل JSON سؤالات + index.ts (تجمیع + اعتبارسنجی + BANK_VERSION)
+│   ├── schema.ts       # تایپ‌های Question (عیناً منطبق بر questions.json) + getCorrectIndex + Subject/Attempt/SrsCard/ActiveExam
+│   ├── subjects.ts     # SUBJECTS/SUBJECT_MAP پویا (از داده استخراج می‌شود) + blueprint آزمون کامل و مضمونی
+│   └── bank/           # questions.json (منبع واحد حقیقت) + index.ts (فیلتر verified + اعتبارسنجی + BANK_VERSION)
 ├── logic/
 │   ├── examEngine.ts   # buildExam + gradeExam (خالص) + تست
 │   ├── analytics.ts    # topicBreakdown/weakestTopics/studyRecommendations + تست
@@ -79,10 +81,14 @@ src/
 ```
 
 ### مدل داده — نکات
-- **سؤال:** دقیقاً ۴ گزینه؛ هر گزینه `explanation` دارد (پایه کارنامه هوشمند). `studyHint` اجباری.
-- **بانک:** برای افزودن سؤال جدید فقط فایل JSON مربوط را ویرایش و `BANK_VERSION` را در `bank/index.ts` یک واحد بالا ببر تا seed دوباره اجرا شود.
-- **آزمون کامل:** ۱۶۰ سؤال / ۱۸۰ دقیقه؛ وزن‌ها در `subjects.ts` (ریاضی ۳۰، فزیک/کیمیا/بیولوژی هرکدام ۲۵، ...).
+- **سؤال:** ساختار دقیقاً منطبق بر `questions.json` — `id, subject, topic, difficulty, question, options[], explanation, chapter_ref, language, source, verified`. هیچ فیلدی (`stem`/`correctIndex`/`studyHint` قدیمی) اضافه نشده.
+- **گزینه‌ها:** `{ text, correct, why_correct?, why_wrong? }` — دقیقاً یکی `correct=true`. اندیس گزینه درست هرگز ذخیره نمی‌شود؛ همیشه با `getCorrectIndex(q)` محاسبه می‌شود.
+- **مضمون/سختی:** `SubjectId`/`Difficulty` از نوع `string`‌اند (نه enum ثابت) — از خودِ داده در `computeSubjects()` استخراج می‌شوند تا بچ‌های بعدی سؤالات با مضامین/سطوح جدید بدون تغییر کد کار کنند. آیکون مضمون صرفاً تزئینی است (`ICONS` در subjects.ts)، نه بخشی از محتوای سؤال.
+- **فیلتر verified:** `ALL_QUESTIONS` در پروداکشن (`import.meta.env.PROD`) فقط `verified===true` را نشان می‌دهد؛ در dev همه (برای تست سؤالات نیازمند بازبینی).
+- **بانک:** برای افزودن بچ بعدی، فقط `src/data/bank/questions.json` را جایگزین/الحاق کن و `BANK_VERSION` را در `bank/index.ts` یک واحد بالا ببر تا seed دوباره اجرا شود. کد نیازی به تغییر ندارد.
+- **آزمون کامل:** بلوپرینت از تعداد سؤالات موجود در بانک برای هر مضمون ساخته می‌شود (بدون وزن رسمی هاردکد‌شده، چون داده فعلی وزن رسمی کانکور را ندارد).
 - **تایمر:** `ActiveExam.deadline` یک timestamp است تا با رفرش دقیق بماند.
+- **کارنامه هوشمند:** `subjectTopicBreakdown()` نتایج را ابتدا بر اساس مضمون، سپس مبحث گروه‌بندی می‌کند. برای هر جواب غلط، `QuestionView` هم `question.explanation` (چرا درست، درست است) و هم `option.why_wrong` گزینهٔ انتخابی کاربر را به‌طور مجزا و برجسته (کادر سرخ) نشان می‌دهد.
 
 ## نکات مهم برای ادامه کار
 

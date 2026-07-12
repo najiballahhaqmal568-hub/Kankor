@@ -1,47 +1,53 @@
-/** شناسه مضامین کانکور */
-export type SubjectId =
-  | 'math'
-  | 'physics'
-  | 'chemistry'
-  | 'biology'
-  | 'dari'
-  | 'pashto'
-  | 'english'
-  | 'islamic'
-  | 'history'
-  | 'geography';
+/**
+ * شناسه مضمون — مستقیماً همان مقدار فیلد `subject` در questions.json (نام دری).
+ * enum ثابت عمداً وجود ندارد: مضامین از خودِ داده استخراج می‌شوند تا افزودن
+ * بچ‌های بعدی سؤالات (با مضامین جدید) بدون تغییر کد ممکن باشد.
+ */
+export type SubjectId = string;
 
 export interface Subject {
   id: SubjectId;
-  /** نام دری برای نمایش */
+  /** نام دری برای نمایش — همان id */
   name: string;
   icon: string;
-  /** تعداد سؤال این مضمون در آزمون کامل کانکور */
+  /** تعداد سؤال این مضمون موجود در بانک فعلی */
   fullExamCount: number;
 }
 
+/** سطح سختی — دقیقاً همان مقدار متنی questions.json */
+export type Difficulty = string;
+
 export interface QuestionOption {
   text: string;
-  /** چرا این گزینه درست/غلط است — برای کارنامه هوشمند */
-  explanation: string;
+  correct: boolean;
+  /** فقط روی گزینه درست: چرا این گزینه درست است */
+  why_correct?: string;
+  /** فقط روی گزینه‌های غلط: چرا این گزینه غلط است */
+  why_wrong?: string;
 }
 
+/** ساختار دقیق یک سؤال — منطبق بر questions.json (بدون هیچ فیلد اضافه یا حذف‌شده) */
 export interface Question {
   id: string;
   subject: SubjectId;
-  /** فصل/مبحث، مثلاً «مثلثات» */
   topic: string;
-  /** ۱=آسان ۲=متوسط ۳=سخت */
-  difficulty: 1 | 2 | 3;
-  stem: string;
-  /** دقیقاً ۴ گزینه */
+  difficulty: Difficulty;
+  question: string;
+  /** حداقل ۲ گزینه؛ دقیقاً یکی correct=true */
   options: QuestionOption[];
-  correctIndex: 0 | 1 | 2 | 3;
-  /** پیشنهاد مطالعه، مثلاً «کتاب ریاضی صنف ۱۲، فصل ۳» */
-  studyHint: string;
-  /** سال کانکور، اگر سؤال سال‌های گذشته باشد */
-  year?: number;
-  tags?: string[];
+  /** چرا پاسخ درست، درست است — همیشه نمایش داده می‌شود */
+  explanation: string;
+  /** ارجاع به فصل/کتاب درسی برای پیشنهاد مطالعه */
+  chapter_ref: string;
+  language: string;
+  source: string;
+  /** فقط سؤالات verified=true در پروداکشن نمایش داده می‌شوند */
+  verified: boolean;
+}
+
+/** اندیس گزینه درست — از روی داده محاسبه می‌شود، هرگز ذخیره یا هاردکد نمی‌شود */
+export function getCorrectIndex(q: Question): number {
+  return q.options.findIndex((o) => o.correct);
 }
 
 /** نوع آزمون */
