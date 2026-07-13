@@ -5,7 +5,7 @@ import raw from './questions.json';
  * نسخه بانک سؤالات. هر بار که محتوای questions.json تغییر کند این عدد بالا برود
  * تا seed دوباره در IndexedDB اجرا شود (ADR-002).
  */
-export const BANK_VERSION = 6;
+export const BANK_VERSION = 7;
 
 interface QuestionsFile {
   schema_version: string;
