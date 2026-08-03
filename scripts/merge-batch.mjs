@@ -1,38 +1,46 @@
 #!/usr/bin/env node
 /**
- * ادغام یک بچ سؤال جدید (هر شکل خام شناخته‌شده) در src/data/bank/questions.json.
- *
- * این اسکریپت خارج از اپ اجرا می‌شود (Node ساده) — کد اپ هرگز لازم نیست تغییر کند؛
- * فقط این اسکریپت باید بچ خام را به شکل canonical (منطبق بر Question در schema.ts)
- * تبدیل کند. اگر بچ بعدی شکل سومی داشت، فقط یک تابع normalize دیگر اینجا اضافه شود.
+ * ادغام بچ‌های سؤال جدید در src/data/bank/questions.json — با اعتبارسنجی سخت‌گیرانه.
  *
  * استفاده:
- *   node scripts/merge-batch.mjs <path-to-batch.json>
+ *   node scripts/merge-batch.mjs                    ← همه فایل‌های جدید content/questions را ادغام کن
+ *   node scripts/merge-batch.mjs <path-to-batch>    ← فقط همین فایل را ادغام کن
+ *
+ * جریان کاری پیشنهادی: فایل خام بچ را در content/questions/ بگذار و اسکریپت را
+ * بدون آرگومان اجرا کن. فایل‌های قبلاً پردازش‌شده (بر اساس هش محتوا در
+ * content/questions/.merged.json) خودکار رد می‌شوند؛ اگر محتوای فایلی تغییر کند
+ * دوباره پردازش می‌شود (تکراری‌ها بر اساس id رد می‌شوند، پس ادغام idempotent است).
  *
  * شکل‌های خام شناخته‌شده:
- *   A) { schema_version, source_form, field_notes, questions: [...] }
- *      questions[i].options = [{ text, correct, why_correct?, why_wrong? }]
- *      + explanation, chapter_ref, language, source, verified
+ *   A) { schema_version, questions: [...] } — options آبجکتی { text, correct, why_correct?, why_wrong? }
+ *   B) [ ... ] — options رشته‌ای + correct_index + why + why_wrong[]
+ * اگر بچی با شکل سوم رسید، فقط یک تابع normalize دیگر به همین فایل اضافه شود؛ کد اپ ثابت می‌ماند.
  *
- *   B) [ { id, subject, topic, chapter, difficulty, question,
- *          options: string[], correct_index, why, why_wrong: string[],
- *          source_form, verified } ]
+ * اعتبارسنجی (خط دفاع دوم کیفیت — هر سؤالی که رد شود گزارش می‌شود و وارد بانک نمی‌شود):
+ *   - جواب درست مشخص: شکل B باید correct_index عددیِ غیر null و در محدوده گزینه‌ها داشته باشد؛
+ *     شکل A باید دقیقاً یک گزینه correct=true داشته باشد
+ *   - دقیقاً ۴ گزینه
+ *   - verified === true (سؤال تأییدنشده اصلاً وارد بانک نمی‌شود)
+ *   - فیلدهای id / subject / question / explanation / chapter_ref خالی نباشند
+ *   - هر گزینه غلط why_wrong و گزینه درست why_correct داشته باشد
  *
- * نگاشت‌های نُرمال‌سازی (برای یکدست ماندن فیلترها در UI):
- *   سختی: «سخت» → «دشوار» (بانک موجود از «دشوار» استفاده می‌کند)
- *   مضمون: «ریاضی» → «ریاضیات» (بانک موجود از «ریاضیات» استفاده می‌کند)
- * اگر بچ بعدی مضمون/سختی جدیدی با نام متفاوت اما هم‌معنی آورد، این نگاشت‌ها
- * را در DIFFICULTY_ALIASES / SUBJECT_ALIASES پایین همین فایل اضافه کن.
+ * نگاشت نام‌های هم‌معنی (برای یکدست ماندن فیلترهای UI):
+ *   سختی: «سخت» → «دشوار» · مضمون: «ریاضی» → «ریاضیات»
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const BANK_PATH = path.join(__dirname, '../src/data/bank/questions.json');
+const CONTENT_DIR = path.join(__dirname, '../content/questions');
+const MANIFEST_PATH = path.join(CONTENT_DIR, '.merged.json');
 
 const DIFFICULTY_ALIASES = { سخت: 'دشوار' };
 const SUBJECT_ALIASES = { ریاضی: 'ریاضیات' };
+
+const REQUIRED_OPTION_COUNT = 4;
 
 function normalizeCanonical(q) {
   return {
@@ -42,14 +50,20 @@ function normalizeCanonical(q) {
   };
 }
 
-/** شکل B → canonical */
-function normalizeFlatShape(q) {
-  const options = q.options.map((text, i) => {
-    const correct = i === q.correct_index;
+/** شکل B (flat/correct_index) → canonical. خطاهای ساختاری خام همین‌جا جمع می‌شوند. */
+function normalizeFlatShape(q, rawErrors) {
+  const ci = q.correct_index;
+  if (ci === null || ci === undefined || !Number.isInteger(ci)) {
+    rawErrors.push('correct_index غیر عددی یا null است');
+  } else if (!Array.isArray(q.options) || ci < 0 || ci >= q.options.length) {
+    rawErrors.push(`correct_index (${ci}) خارج از محدوده گزینه‌هاست`);
+  }
+  const options = (q.options ?? []).map((text, i) => {
+    const correct = i === ci;
     return {
       text,
       correct,
-      ...(correct ? { why_correct: q.why } : { why_wrong: q.why_wrong[i] }),
+      ...(correct ? { why_correct: q.why } : { why_wrong: (q.why_wrong ?? [])[i] }),
     };
   });
   return normalizeCanonical({
@@ -68,71 +82,130 @@ function normalizeFlatShape(q) {
 }
 
 function isCanonicalShape(q) {
-  return Array.isArray(q.options) && typeof q.options[0] === 'object' && 'correct' in (q.options[0] ?? {});
+  return Array.isArray(q.options) && typeof q.options[0] === 'object' && q.options[0] !== null && 'correct' in q.options[0];
 }
 
-function loadBatch(filePath) {
-  const raw = JSON.parse(readFileSync(filePath, 'utf8'));
-  const items = Array.isArray(raw) ? raw : raw.questions;
-  if (!Array.isArray(items)) throw new Error('ساختار فایل ورودی شناخته‌شده نیست (نه آرایه، نه {questions:[]})');
-  return items.map((q) => (isCanonicalShape(q) ? normalizeCanonical(q) : normalizeFlatShape(q)));
-}
-
+/** اعتبارسنجی سخت‌گیرانه روی شکل canonical — آرایه دلایل رد را برمی‌گرداند */
 function validate(q) {
   const errors = [];
   if (!q.id) errors.push('id ندارد');
   if (!q.subject) errors.push('subject ندارد');
   if (!q.question) errors.push('question ندارد');
-  if (!Array.isArray(q.options) || q.options.length < 2) errors.push('حداقل ۲ گزینه لازم است');
-  const correctCount = (q.options || []).filter((o) => o.correct).length;
-  if (correctCount !== 1) errors.push(`باید دقیقاً یک گزینه correct=true باشد (یافت‌شده: ${correctCount})`);
+  if (!Array.isArray(q.options) || q.options.length !== REQUIRED_OPTION_COUNT) {
+    errors.push(`باید دقیقاً ${REQUIRED_OPTION_COUNT} گزینه داشته باشد (دارد: ${q.options?.length ?? 0})`);
+  }
+  const correctCount = (q.options ?? []).filter((o) => o.correct).length;
+  if (correctCount !== 1) errors.push(`باید دقیقاً یک گزینه درست داشته باشد (دارد: ${correctCount})`);
   if (!q.explanation) errors.push('explanation ندارد');
   if (!q.chapter_ref) errors.push('chapter_ref ندارد');
+  if (q.verified !== true) errors.push('verified برابر true نیست');
+  for (const [i, o] of (q.options ?? []).entries()) {
+    if (!o.text) errors.push(`گزینه ${i + 1} متن ندارد`);
+    if (o.correct && !o.why_correct) errors.push(`گزینه درست (${i + 1}) توضیح why_correct ندارد`);
+    if (!o.correct && !o.why_wrong) errors.push(`گزینه غلط (${i + 1}) توضیح why_wrong ندارد`);
+  }
   return errors;
 }
 
-function main() {
-  const inputPath = process.argv[2];
-  if (!inputPath) {
-    console.error('استفاده: node scripts/merge-batch.mjs <path-to-batch.json>');
-    process.exit(1);
-  }
+function loadBatchItems(filePath) {
+  const raw = JSON.parse(readFileSync(filePath, 'utf8'));
+  const items = Array.isArray(raw) ? raw : raw.questions;
+  if (!Array.isArray(items)) throw new Error('ساختار فایل شناخته‌شده نیست (نه آرایه، نه {questions:[]})');
+  return items;
+}
 
-  const bank = JSON.parse(readFileSync(BANK_PATH, 'utf8'));
-  const existingIds = new Set(bank.questions.map((q) => q.id));
-  const incoming = loadBatch(inputPath);
+function sha256(filePath) {
+  return createHash('sha256').update(readFileSync(filePath)).digest('hex');
+}
 
-  let added = 0;
-  let skipped = 0;
-  const problems = [];
+function loadManifest() {
+  return existsSync(MANIFEST_PATH) ? JSON.parse(readFileSync(MANIFEST_PATH, 'utf8')) : {};
+}
 
-  for (const q of incoming) {
-    const errors = validate(q);
+/** یک فایل بچ را پردازش می‌کند و آمار برمی‌گرداند؛ سؤالات معتبر را به bank اضافه می‌کند */
+function processFile(filePath, bank, existingIds) {
+  const stats = { added: 0, duplicates: 0, rejected: [] };
+  for (const rawItem of loadBatchItems(filePath)) {
+    const rawErrors = [];
+    const q = isCanonicalShape(rawItem)
+      ? normalizeCanonical(rawItem)
+      : normalizeFlatShape(rawItem, rawErrors);
+    const errors = [...rawErrors, ...validate(q)];
     if (errors.length) {
-      problems.push(`${q.id ?? '(بدون id)'}: ${errors.join('؛ ')}`);
+      stats.rejected.push({ id: q.id ?? '(بدون id)', reasons: errors });
       continue;
     }
     if (existingIds.has(q.id)) {
-      skipped++;
+      stats.duplicates++;
       continue;
     }
     bank.questions.push(q);
     existingIds.add(q.id);
-    added++;
+    stats.added++;
+  }
+  return stats;
+}
+
+function main() {
+  const explicitPath = process.argv[2];
+  const bank = JSON.parse(readFileSync(BANK_PATH, 'utf8'));
+  const existingIds = new Set(bank.questions.map((q) => q.id));
+  const manifest = loadManifest();
+
+  let targets;
+  if (explicitPath) {
+    targets = [explicitPath];
+  } else {
+    if (!existsSync(CONTENT_DIR)) {
+      console.error(`پوشه ${CONTENT_DIR} وجود ندارد.`);
+      process.exit(1);
+    }
+    targets = readdirSync(CONTENT_DIR)
+      .filter((f) => f.endsWith('.json') && !f.startsWith('.'))
+      .sort()
+      .map((f) => path.join(CONTENT_DIR, f))
+      .filter((p) => manifest[path.basename(p)]?.hash !== sha256(p));
+    if (targets.length === 0) {
+      console.log('✅ فایل جدید یا تغییرکرده‌ای در content/questions نیست — بانک به‌روز است.');
+      return;
+    }
   }
 
-  if (problems.length) {
-    console.error('❌ سؤالات نامعتبر (اضافه نشدند):');
-    problems.forEach((p) => console.error('  - ' + p));
+  let totalAdded = 0;
+  let totalRejected = 0;
+
+  for (const filePath of targets) {
+    const name = path.basename(filePath);
+    console.log(`\n📄 ${name}`);
+    const stats = processFile(filePath, bank, existingIds);
+    totalAdded += stats.added;
+    totalRejected += stats.rejected.length;
+    console.log(`   افزوده: ${stats.added} · تکراری (قبلاً در بانک): ${stats.duplicates} · ردشده: ${stats.rejected.length}`);
+    for (const r of stats.rejected) {
+      console.log(`   ❌ ${r.id}:`);
+      for (const reason of r.reasons) console.log(`      - ${reason}`);
+    }
+    // فایل‌های داخل content/questions در manifest ثبت می‌شوند (حتی اگر همه تکراری بودند)
+    if (!explicitPath || filePath.startsWith(CONTENT_DIR)) {
+      manifest[name] = {
+        hash: sha256(filePath),
+        mergedAt: new Date().toISOString(),
+        added: stats.added,
+        duplicates: stats.duplicates,
+        rejected: stats.rejected.map((r) => r.id),
+      };
+    }
   }
 
-  if (added > 0) {
+  if (totalAdded > 0) {
     writeFileSync(BANK_PATH, JSON.stringify(bank, null, 2) + '\n', 'utf8');
   }
+  writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2) + '\n', 'utf8');
 
-  console.log(`✅ افزوده شد: ${added} | رد شد (تکراری): ${skipped} | نامعتبر: ${problems.length}`);
+  console.log('\n──────── جمع‌بندی ────────');
+  console.log(`افزوده‌شده: ${totalAdded} · ردشده: ${totalRejected}`);
   console.log(`مجموع سؤالات بانک اکنون: ${bank.questions.length}`);
-  if (added > 0) {
+  if (totalAdded > 0) {
     console.log('⚠️  یادت نرود BANK_VERSION را در src/data/bank/index.ts یک واحد بالا ببری.');
   }
 }

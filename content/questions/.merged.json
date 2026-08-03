@@ -1,0 +1,46 @@
+{
+  "batch0_core_57.json": {
+    "hash": "c9c0e7ca000bd59359788292b39badf452dcc9273baab6525bbc2e648797222d",
+    "mergedAt": "2026-07-13T03:52:44.074Z",
+    "added": 0,
+    "duplicates": 57,
+    "rejected": []
+  },
+  "batch1_riazi.json": {
+    "hash": "fdcdb5d59e9b08b74de8ab74c417274b32fe72c56201d71f9a08288ace5cc9d4",
+    "mergedAt": "2026-07-13T03:52:44.090Z",
+    "added": 0,
+    "duplicates": 13,
+    "rejected": []
+  },
+  "batch2_riazi.json": {
+    "hash": "ccc4227fd44b8bb4bb4e524e90e234373a8bf3591800a7ea4c8ed1189f993c26",
+    "mergedAt": "2026-07-13T03:52:44.093Z",
+    "added": 0,
+    "duplicates": 20,
+    "rejected": [
+      "rahnamoon-1405-r1-q21"
+    ]
+  },
+  "batch3_riazi.json": {
+    "hash": "e7061b186aea00a09238abc0461045985510badd744a5c9309c19446b19a99e7",
+    "mergedAt": "2026-07-13T03:52:44.095Z",
+    "added": 0,
+    "duplicates": 9,
+    "rejected": []
+  },
+  "batch4_kimia_biology.json": {
+    "hash": "a6d98f16e0504608f88b26e8bf87b37c157eb5865d6fc05e07536f68a003a6ec",
+    "mergedAt": "2026-07-13T03:52:44.095Z",
+    "added": 0,
+    "duplicates": 7,
+    "rejected": []
+  },
+  "batch5_kimia_fizik.json": {
+    "hash": "9c85475abc335e955aa9aad87f488a9c6f62fa23c038f7f045f02667df90c2a3",
+    "mergedAt": "2026-07-13T03:52:44.096Z",
+    "added": 0,
+    "duplicates": 9,
+    "rejected": []
+  }
+}
