@@ -5,10 +5,12 @@ import { ALL_QUESTIONS } from './bank';
  * نگاشت اسم مضمون → آیکون. صرفاً تزئینی است (نه محتوای سؤال)، پس نقض
  * «هیچ فیلد را هاردکد نکن» نیست. مضمون‌های ناشناس آیکون پیش‌فرض می‌گیرند
  * تا بچ‌های بعدی با مضامین جدید بدون تغییر کد کار کنند.
+ *
+ * فقط نام‌های canonical اینجا می‌آیند؛ هم‌معنی‌ها (مثل «ریاضی») طبق ADR-008
+ * تنها در `scripts/merge-batch.mjs` نُرمال می‌شوند و هرگز وارد بانک نمی‌شوند.
  */
 const ICONS: Record<string, string> = {
   ریاضیات: '📐',
-  ریاضی: '📐',
   فزیک: '⚛️',
   کیمیا: '🧪',
   بیولوژی: '🧬',
@@ -43,7 +45,7 @@ export function computeSubjects(questions = ALL_QUESTIONS): Subject[] {
 
 export const SUBJECTS: Subject[] = computeSubjects();
 
-export const SUBJECT_MAP: Record<SubjectId, Subject> = Object.fromEntries(
+const SUBJECT_MAP: Record<SubjectId, Subject> = Object.fromEntries(
   SUBJECTS.map((s) => [s.id, s]),
 );
 

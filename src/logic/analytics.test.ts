@@ -8,9 +8,9 @@ import {
 import type { AnswerRecord, Question } from '../data/schema';
 
 const questions: Record<string, Question> = {
-  m1: mk('m1', 'ریاضی', 'الجبر', 'کتاب الجبر'),
-  m2: mk('m2', 'ریاضی', 'الجبر', 'کتاب الجبر'),
-  m3: mk('m3', 'ریاضی', 'هندسه', 'کتاب هندسه'),
+  m1: mk('m1', 'ریاضیات', 'الجبر', 'کتاب الجبر'),
+  m2: mk('m2', 'ریاضیات', 'الجبر', 'کتاب الجبر'),
+  m3: mk('m3', 'ریاضیات', 'هندسه', 'کتاب هندسه'),
   p1: mk('p1', 'فزیک', 'حرکت', 'کتاب فزیک'),
 };
 
@@ -80,7 +80,7 @@ describe('studyRecommendations', () => {
   it('پیشنهادها را بر اساس مضمون گروه‌بندی و chapter_ref تکراری را حذف می‌کند', () => {
     const answers = [ans('m1', false), ans('m2', false), ans('p1', false)];
     const groups = studyRecommendations(answers, lookup);
-    const math = groups.find((g) => g.subject === 'ریاضی')!;
+    const math = groups.find((g) => g.subject === 'ریاضیات')!;
     // m1 و m2 هر دو chapter_ref یکسان دارند → فقط یک مورد
     expect(math.items).toHaveLength(1);
     expect(groups.find((g) => g.subject === 'فزیک')!.items).toHaveLength(1);

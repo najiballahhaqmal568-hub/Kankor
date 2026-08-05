@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SUBJECTS, fullExamBlueprint, subjectBlueprint } from '../data/subjects';
+import {
+  FULL_EXAM_DURATION_SEC,
+  FULL_EXAM_TOTAL,
+  SUBJECTS,
+  fullExamBlueprint,
+  subjectBlueprint,
+} from '../data/subjects';
 import { ALL_QUESTIONS } from '../data/bank';
 import type { ExamBlueprint, ExamMode, SubjectId } from '../data/schema';
 import { getActiveExam, startExam } from '../db/examSession';
@@ -69,7 +75,9 @@ export default function ExamSetup() {
           onClick={() => setMode('full')}
         >
           <strong>آزمون کامل</strong>
-          <p className="small muted">۱۶۰ سؤال · ۱۸۰ دقیقه</p>
+          <p className="small muted">
+            {faNum(FULL_EXAM_TOTAL)} سؤال · {faDuration(FULL_EXAM_DURATION_SEC)}
+          </p>
         </button>
         <button
           className={`card select-card grow ${mode === 'subject' ? 'selected' : ''}`}

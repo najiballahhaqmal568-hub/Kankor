@@ -54,17 +54,17 @@ describe('pickRandom', () => {
 
 describe('buildExam', () => {
   const bank = [
-    q('m1', 'ریاضی', 0),
-    q('m2', 'ریاضی', 1),
-    q('m3', 'ریاضی', 2),
+    q('m1', 'ریاضیات', 0),
+    q('m2', 'ریاضیات', 1),
+    q('m3', 'ریاضیات', 2),
     q('p1', 'فزیک', 0),
     q('p2', 'فزیک', 1),
   ];
 
   it('از هر مضمون به تعداد خواسته‌شده انتخاب می‌کند', () => {
-    const bp: ExamBlueprint = { mode: 'custom', counts: { ریاضی: 2, فزیک: 1 }, durationSec: 60 };
+    const bp: ExamBlueprint = { mode: 'custom', counts: { ریاضیات: 2, فزیک: 1 }, durationSec: 60 };
     const exam = buildExam(bp, bank, seededRng(5));
-    expect(exam.filter((x) => x.subject === 'ریاضی')).toHaveLength(2);
+    expect(exam.filter((x) => x.subject === 'ریاضیات')).toHaveLength(2);
     expect(exam.filter((x) => x.subject === 'فزیک')).toHaveLength(1);
   });
 
@@ -75,8 +75,8 @@ describe('buildExam', () => {
 });
 
 describe('gradeExam', () => {
-  const questions = [q('m1', 'ریاضی', 0), q('m2', 'ریاضی', 1), q('p1', 'فزیک', 2)];
-  const bp: ExamBlueprint = { mode: 'custom', counts: { ریاضی: 2, فزیک: 1 }, durationSec: 60 };
+  const questions = [q('m1', 'ریاضیات', 0), q('m2', 'ریاضیات', 1), q('p1', 'فزیک', 2)];
+  const bp: ExamBlueprint = { mode: 'custom', counts: { ریاضیات: 2, فزیک: 1 }, durationSec: 60 };
 
   it('نمره و تفکیک مضمون را درست محاسبه می‌کند', () => {
     const answers = { m1: 0, m2: 3, p1: null }; // درست، غلط، بی‌جواب
@@ -88,7 +88,7 @@ describe('gradeExam', () => {
     expect(attempt.total).toBe(3);
     expect(attempt.durationSec).toBe(60);
 
-    const math = attempt.perSubject.find((s) => s.subject === 'ریاضی')!;
+    const math = attempt.perSubject.find((s) => s.subject === 'ریاضیات')!;
     expect(math).toMatchObject({ total: 2, correct: 1, wrong: 1, unanswered: 0 });
     const physics = attempt.perSubject.find((s) => s.subject === 'فزیک')!;
     expect(physics).toMatchObject({ total: 1, correct: 0, wrong: 0, unanswered: 1 });

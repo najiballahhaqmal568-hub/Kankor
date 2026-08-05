@@ -82,15 +82,17 @@ export default function QuestionView({
             </p>
           )}
 
-          {question.options.map((opt, i) => (
-            <p
-              key={i}
-              className={`explanation ${i === correctIndex ? 'is-correct' : ''}`}
-            >
-              <strong>{(OPTION_LABELS[i] ?? faNum(i + 1))})</strong>{' '}
-              {i === correctIndex ? opt.why_correct : opt.why_wrong}
-            </p>
-          ))}
+          {question.options.map((opt, i) => {
+            const why = i === correctIndex ? opt.why_correct : opt.why_wrong;
+            // بچ‌های شکل flat فقط یک متن `why` دارند، پس why_correct عیناً همان
+            // explanation بالاست — دوباره چاپش نکن.
+            if (!why || why === question.explanation) return null;
+            return (
+              <p key={i} className={`explanation ${i === correctIndex ? 'is-correct' : ''}`}>
+                <strong>{(OPTION_LABELS[i] ?? faNum(i + 1))})</strong> {why}
+              </p>
+            );
+          })}
 
           <p className="study-hint">📚 پیشنهاد مطالعه: {question.chapter_ref}</p>
         </div>

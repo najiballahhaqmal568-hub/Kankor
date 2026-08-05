@@ -10,6 +10,7 @@ import {
   studyRecommendations,
   subjectTopicBreakdown,
   topicBreakdown,
+  weakestTopics,
 } from '../logic/analytics';
 import QuestionView from '../components/QuestionView';
 import { faDate, faDuration, faNum, faPercent } from '../lib/format';
@@ -52,6 +53,7 @@ export default function Report() {
   const ratio = attempt.total ? attempt.score / attempt.total : 0;
   const topics = topicBreakdown(answers, getQuestion);
   const bySubject = subjectTopicBreakdown(topics);
+  const weakest = weakestTopics(topics);
   const study = studyRecommendations(answers, getQuestion);
   const answerMap = new Map(answers.map((a) => [a.questionId, a]));
 
@@ -113,6 +115,27 @@ export default function Report() {
           );
         })}
       </div>
+
+      {/* ضعیف‌ترین مباحث */}
+      {weakest.length > 0 && (
+        <div className="card">
+          <h3>ضعیف‌ترین مباحث ⚠️</h3>
+          <div className="filter-group">
+            {weakest.map((t) => {
+              const subj = getSubject(t.subject);
+              return (
+                <span
+                  key={`${t.subject}::${t.topic}`}
+                  className="chip"
+                  style={{ borderColor: BAND_COLOR[perfBand(t.ratio)] }}
+                >
+                  {subj.icon} {t.topic} · {faPercent(t.ratio)}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* تفکیک بر اساس مضمون و مبحث */}
       {bySubject.length > 0 && (

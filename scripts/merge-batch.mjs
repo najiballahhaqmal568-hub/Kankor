@@ -21,8 +21,12 @@
  *     شکل A باید دقیقاً یک گزینه correct=true داشته باشد
  *   - دقیقاً ۴ گزینه
  *   - verified === true (سؤال تأییدنشده اصلاً وارد بانک نمی‌شود)
- *   - فیلدهای id / subject / question / explanation / chapter_ref خالی نباشند
+ *   - فیلدهای id / subject / topic / question / explanation / chapter_ref خالی نباشند
  *   - هر گزینه غلط why_wrong و گزینه درست why_correct داشته باشد
+ *   - در شکل B طول why_wrong با تعداد گزینه‌ها برابر باشد (وگرنه توضیح‌ها یک خانه جابه‌جا می‌چسبند)
+ *
+ * topic در برابر chapter_ref: topic دستهٔ درشت است (کارنامه و فیلتر بانک با آن گروه می‌شوند)
+ * و chapter_ref زیرمبحث ریز برای «پیشنهاد مطالعه». این دو هرگز نباید یکی شوند.
  *
  * نگاشت نام‌های هم‌معنی (برای یکدست ماندن فیلترهای UI):
  *   سختی: «سخت» → «دشوار» · مضمون: «ریاضی» → «ریاضیات»
@@ -34,8 +38,23 @@ import path from 'node:path';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const BANK_PATH = path.join(__dirname, '../src/data/bank/questions.json');
+const BANK_INDEX_PATH = path.join(__dirname, '../src/data/bank/index.ts');
 const CONTENT_DIR = path.join(__dirname, '../content/questions');
 const MANIFEST_PATH = path.join(CONTENT_DIR, '.merged.json');
+
+/**
+ * BANK_VERSION را یک واحد بالا می‌برد تا seed دوباره در IndexedDB اجرا شود.
+ * خودکار است چون شرط «بچ‌های بعدی بدون تغییر کد اضافه شوند» با ویرایش دستی نقض می‌شد.
+ */
+function bumpBankVersion() {
+  const src = readFileSync(BANK_INDEX_PATH, 'utf8');
+  const pattern = /(export const BANK_VERSION = )(\d+)/;
+  const match = src.match(pattern);
+  if (!match) throw new Error(`BANK_VERSION در ${BANK_INDEX_PATH} پیدا نشد`);
+  const next = Number(match[2]) + 1;
+  writeFileSync(BANK_INDEX_PATH, src.replace(pattern, `$1${next}`), 'utf8');
+  return next;
+}
 
 const DIFFICULTY_ALIASES = { سخت: 'دشوار' };
 const SUBJECT_ALIASES = { ریاضی: 'ریاضیات' };
@@ -66,15 +85,23 @@ function normalizeFlatShape(q, rawErrors) {
       ...(correct ? { why_correct: q.why } : { why_wrong: (q.why_wrong ?? [])[i] }),
     };
   });
+  if (Array.isArray(q.why_wrong) && Array.isArray(q.options) && q.why_wrong.length !== q.options.length) {
+    rawErrors.push(
+      `طول why_wrong (${q.why_wrong.length}) با تعداد گزینه‌ها (${q.options.length}) برابر نیست — ` +
+        'توضیح‌ها به گزینه اشتباه می‌چسبند',
+    );
+  }
   return normalizeCanonical({
     id: q.id,
     subject: q.subject,
-    topic: q.chapter || q.topic,
+    // topic = دستهٔ درشت (مثل «مشتق») · chapter = زیرمبحث ریز (مثل «مشتق چندجمله‌ای درجه دوم»).
+    // این دو نباید یکی شوند وگرنه گروه‌بندی کارنامه و فیلتر بانک به ازای هر سؤال یک چیپ می‌سازند.
+    topic: q.topic || q.chapter,
     difficulty: q.difficulty,
     question: q.question,
     options,
     explanation: q.why,
-    chapter_ref: q.chapter || q.topic,
+    chapter_ref: q.chapter || q.chapter_ref || q.topic,
     language: q.language || 'dari',
     source: q.source_form || q.source || '',
     verified: q.verified === true,
@@ -90,6 +117,7 @@ function validate(q) {
   const errors = [];
   if (!q.id) errors.push('id ندارد');
   if (!q.subject) errors.push('subject ندارد');
+  if (!q.topic) errors.push('topic ندارد (گروه‌بندی کارنامه و فیلتر بانک به آن وابسته است)');
   if (!q.question) errors.push('question ندارد');
   if (!Array.isArray(q.options) || q.options.length !== REQUIRED_OPTION_COUNT) {
     errors.push(`باید دقیقاً ${REQUIRED_OPTION_COUNT} گزینه داشته باشد (دارد: ${q.options?.length ?? 0})`);
@@ -206,7 +234,7 @@ function main() {
   console.log(`افزوده‌شده: ${totalAdded} · ردشده: ${totalRejected}`);
   console.log(`مجموع سؤالات بانک اکنون: ${bank.questions.length}`);
   if (totalAdded > 0) {
-    console.log('⚠️  یادت نرود BANK_VERSION را در src/data/bank/index.ts یک واحد بالا ببری.');
+    console.log(`🔖 BANK_VERSION خودکار به ${bumpBankVersion()} ارتقا یافت (seed دوباره اجرا می‌شود).`);
   }
 }
 
